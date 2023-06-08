@@ -8,37 +8,45 @@
 
 using namespace ispc;
 
-extern void sqrtSerial(int N, float startGuess, float* values, float* output);
+extern void sqrtSerial(int N, float startGuess, float *values, float *output);
 
-static void verifyResult(int N, float* result, float* gold) {
-    for (int i=0; i<N; i++) {
-        if (fabs(result[i] - gold[i]) > 1e-4) {
+static void verifyResult(int N, float *result, float *gold)
+{
+    for (int i = 0; i < N; i++)
+    {
+        if (fabs(result[i] - gold[i]) > 1e-4)
+        {
             printf("Error: [%d] Got %f expected %f\n", i, result[i], gold[i]);
         }
     }
 }
 
-int main() {
+int main()
+{
 
     const unsigned int N = 20 * 1000 * 1000;
     const float initialGuess = 1.0f;
 
-    float* values = new float[N];
-    float* output = new float[N];
-    float* gold = new float[N];
+    float *values = new float[N];
+    float *output = new float[N];
+    float *gold = new float[N];
 
-    for (unsigned int i=0; i<N; i++)
+    for (unsigned int i = 0; i < N; i++)
     {
         // TODO: CS149 students.  Attempt to change the values in the
         // array here to meet the instructions in the handout: we want
         // to you generate best and worse-case speedups
-        
+
         // starter code populates array with random input values
-        values[i] = .001f + 2.998f * static_cast<float>(rand()) / RAND_MAX;
+        // values[i] = .001f + 2.998f * static_cast<float>(rand()) / RAND_MAX;
+        // values[i] = 0.000001f; //(6.33x speedup from ISPC) (56.36x speedup from task ISPC)
+        // values[i] = 2.999999f; //(6.77x speedup from ISPC) (66.74x speedup from task ISPC) best
+        // values[i] = 1.f; //(1.74x speedup from ISPC) (1.98x speedup from task ISPC) worse
+        values[i] = 1.0f + i * 0.0000000000000000000000001f;
     }
 
     // generate a gold version to check results
-    for (unsigned int i=0; i<N; i++)
+    for (unsigned int i = 0; i < N; i++)
         gold[i] = sqrt(values[i]);
 
     //
@@ -46,7 +54,8 @@ int main() {
     // minimum time.
     //
     double minSerial = 1e30;
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i)
+    {
         double startTime = CycleTimer::currentSeconds();
         sqrtSerial(N, initialGuess, values, output);
         double endTime = CycleTimer::currentSeconds();
@@ -62,7 +71,8 @@ int main() {
     // time of three runs.
     //
     double minISPC = 1e30;
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i)
+    {
         double startTime = CycleTimer::currentSeconds();
         sqrt_ispc(N, initialGuess, values, output);
         double endTime = CycleTimer::currentSeconds();
@@ -81,7 +91,8 @@ int main() {
     // Tasking version of the ISPC code
     //
     double minTaskISPC = 1e30;
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i)
+    {
         double startTime = CycleTimer::currentSeconds();
         sqrt_ispc_withtasks(N, initialGuess, values, output);
         double endTime = CycleTimer::currentSeconds();
@@ -92,12 +103,12 @@ int main() {
 
     verifyResult(N, output, gold);
 
-    printf("\t\t\t\t(%.2fx speedup from ISPC)\n", minSerial/minISPC);
-    printf("\t\t\t\t(%.2fx speedup from task ISPC)\n", minSerial/minTaskISPC);
+    printf("\t\t\t\t(%.2fx speedup from ISPC)\n", minSerial / minISPC);
+    printf("\t\t\t\t(%.2fx speedup from task ISPC)\n", minSerial / minTaskISPC);
 
-    delete [] values;
-    delete [] output;
-    delete [] gold;
+    delete[] values;
+    delete[] output;
+    delete[] gold;
 
     return 0;
 }

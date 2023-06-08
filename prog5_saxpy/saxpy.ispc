@@ -33,6 +33,10 @@ export void saxpy_ispc_withtasks(uniform int N,
                                uniform float result[])
 {
 
+    // uniform int numTasks = min(N, 2000);  // Adjust the number of tasks based on available parallelism
+
+    // uniform int span = (N + numTasks - 1) / numTasks;
+
     uniform int span = N / 64;  // 64 tasks
 
     launch[N/span] saxpy_ispc_task(N, span, scale, X, Y, result);
